@@ -1,7 +1,11 @@
 
 import { Wrench, Hammer, Lightbulb, PaintBucket } from "lucide-react";
+import { useChat } from "@/contexts/ChatContext";
+import { Button } from "@/components/ui/button";
 
 const WelcomeScreen = () => {
+  const { hfToken } = useChat();
+  
   const examples = [
     { 
       icon: <Wrench className="h-6 w-6" />,
@@ -25,6 +29,17 @@ const WelcomeScreen = () => {
     <div className="h-full flex flex-col items-center justify-center p-6">
       <h1 className="text-4xl font-bold mb-2">Welcome to HomeFixAI</h1>
       <p className="text-xl text-muted-foreground mb-8">Your personal home repair assistant</p>
+      
+      {!hfToken && (
+        <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg mb-8 max-w-md text-center">
+          <p className="text-yellow-800 dark:text-yellow-200 mb-2">
+            To use HomeFixAI, please set up your Hugging Face API token in Settings
+          </p>
+          <p className="text-sm text-yellow-700 dark:text-yellow-300">
+            You can get a free token at huggingface.co
+          </p>
+        </div>
+      )}
       
       <div className="max-w-2xl w-full">
         <h2 className="text-lg font-medium mb-4">Try asking about:</h2>

@@ -3,10 +3,11 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@/contexts/ChatContext";
-import { Send, Paperclip, X } from "lucide-react";
+import { Send, Paperclip, X, Settings } from "lucide-react";
+import Settings from "./Settings";
 
 const ChatInput = () => {
-  const { sendMessage, isLoading } = useChat();
+  const { sendMessage, isLoading, hfToken } = useChat();
   const [message, setMessage] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,7 +21,7 @@ const ChatInput = () => {
   };
   
   const handleSendMessage = async () => {
-    if (message.trim() || images.length > 0) {
+    if ((message.trim() || images.length > 0) && hfToken) {
       await sendMessage(message, images);
       setMessage("");
       setImages([]);
@@ -93,11 +94,13 @@ const ChatInput = () => {
             <Paperclip className="h-5 w-5" />
           </Button>
           
+          <Settings />
+          
           <Button 
             type="button" 
             size="icon"
             onClick={handleSendMessage}
-            disabled={(!message.trim() && images.length === 0) || isLoading}
+            disabled={(!message.trim() && images.length === 0) || isLoading || !hfToken}
           >
             <Send className="h-5 w-5" />
           </Button>
