@@ -1,5 +1,5 @@
 
-import { Tool, Wrench, Lightbulb, PaintBucket } from "lucide-react";
+import { Wrench, Hammer, Lightbulb, PaintBucket } from "lucide-react";
 
 const WelcomeScreen = () => {
   const examples = [
@@ -8,7 +8,7 @@ const WelcomeScreen = () => {
       text: "How do I fix a leaky kitchen faucet?" 
     },
     { 
-      icon: <Tool className="h-6 w-6" />,
+      icon: <Hammer className="h-6 w-6" />,
       text: "What's the best way to unclog a bathroom drain without chemicals?" 
     },
     { 
