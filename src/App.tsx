@@ -8,7 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import ChatLayout from "./components/ChatLayout";
 import NotFound from "./pages/NotFound";
-import Settings from "./components/Settings";
+import SettingsPanel from "./components/Settings";
 
 const queryClient = new QueryClient();
 

@@ -7,7 +7,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 
-const Settings = () => {
+const SettingsPanel = () => {
   const { hfToken, setHfToken } = useChat();
   const [tokenInput, setTokenInput] = useState(hfToken);
   
@@ -70,4 +70,4 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default SettingsPanel;

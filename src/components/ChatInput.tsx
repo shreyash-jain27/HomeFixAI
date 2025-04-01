@@ -3,8 +3,8 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@/contexts/ChatContext";
-import { Send, Paperclip, X, Settings } from "lucide-react";
-import Settings from "./Settings";
+import { Send, Paperclip, X, Cog } from "lucide-react";
+import SettingsPanel from "./Settings";
 
 const ChatInput = () => {
   const { sendMessage, isLoading, hfToken } = useChat();
@@ -94,7 +94,7 @@ const ChatInput = () => {
             <Paperclip className="h-5 w-5" />
           </Button>
           
-          <Settings />
+          <SettingsPanel />
           
           <Button 
             type="button" 
