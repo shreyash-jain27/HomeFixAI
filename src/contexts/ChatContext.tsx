@@ -223,14 +223,16 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const buildPrompt = (messages: ChatMessage[]) => {
-    const homeFixesPrompt = "You are an expert in home fixes and repairs. Provide detailed, step-by-step instructions for solving common household problems. Focus on being practical, safety-conscious, and recommending the right tools and materials.\n\n";
+    const homeFixesPrompt = "You are HomeFixAI, an expert in home fixes and repairs. Provide detailed, step-by-step instructions for solving common household problems. Focus on being practical, safety-conscious, and recommending the right tools and materials. Always respond directly to the user's question without including any fictional dialogue or conversation history. Address the user's current query only.\n\n";
     
-    const conversationHistory = messages.map(msg => {
+    const recentMessages = messages.slice(-5);
+    
+    const conversationHistory = recentMessages.map(msg => {
       const role = msg.role === 'user' ? 'User' : 'Assistant';
       return `${role}: ${msg.content}`;
     }).join('\n');
     
-    return `${homeFixesPrompt}${conversationHistory}`;
+    return `${homeFixesPrompt}${conversationHistory}\n\nAssistant:`;
   };
 
   const deleteChat = (chatId: string) => {

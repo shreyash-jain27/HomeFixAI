@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useChat } from "@/contexts/ChatContext";
 import { Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -26,6 +26,9 @@ const SettingsPanel = () => {
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>
+          <SheetDescription>
+            Configure your AI assistant settings
+          </SheetDescription>
         </SheetHeader>
         
         <div className="py-6">

@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@/contexts/ChatContext";
-import { Send, Paperclip, X, Cog } from "lucide-react";
+import { Send, Paperclip, X } from "lucide-react";
 import SettingsPanel from "./Settings";
 
 const ChatInput = () => {
