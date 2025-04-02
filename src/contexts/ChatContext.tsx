@@ -117,17 +117,26 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       let images: string[] = [];
       
       if (imageFiles && imageFiles.length > 0) {
+        console.log(`Processing ${imageFiles.length} images`);
+        
         images = await Promise.all(imageFiles.map(async (file) => {
-          return new Promise<string>((resolve) => {
+          return new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => {
               if (e.target?.result) {
+                console.log(`Image loaded: ${file.name}, type: ${file.type}`);
                 resolve(e.target.result.toString());
               }
+            };
+            reader.onerror = (e) => {
+              console.error("Error reading file:", e);
+              reject(new Error("Failed to read image file"));
             };
             reader.readAsDataURL(file);
           });
         }));
+        
+        console.log(`Successfully processed ${images.length} images`);
       }
       
       const userMessage: ChatMessage = {
@@ -164,12 +173,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       let responseText: string;
       
       if (images.length > 0) {
+        console.log("Sending message with images to Gemini");
         responseText = await generateImageResponse(
           prompt,
           images,
           geminiKey
         );
       } else {
+        console.log("Sending text-only message to Gemini");
         responseText = await generateTextResponse(
           prompt,
           geminiKey
@@ -195,14 +206,30 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           return c;
         })
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to get assistant response:', err);
-      setError('Failed to get a response from the AI assistant. Please try again later.');
+      const errorMessage = err.message || 'Failed to get a response from the AI assistant.';
+      setError(errorMessage);
       
-      const errorMessage: ChatMessage = {
+      // Create a more user-friendly error message
+      let userFriendlyError = "I'm having trouble connecting right now. ";
+      
+      if (errorMessage.includes("400") || errorMessage.includes("Bad Request")) {
+        userFriendlyError += "There was an issue with the request format. ";
+      } else if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+        userFriendlyError += "Please check your Google Gemini API key. ";
+      } else if (errorMessage.includes("429") || errorMessage.includes("Too Many Requests")) {
+        userFriendlyError += "You've reached the API rate limit. Please try again later. ";
+      } else if (errorMessage.includes("500") || errorMessage.includes("Server Error")) {
+        userFriendlyError += "The Gemini service is experiencing issues. Please try again later. ";
+      }
+      
+      userFriendlyError += "If the problem persists, there may be an issue with the service itself.";
+      
+      const errorChatMessage: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: "I'm having trouble connecting right now. Please check your Google Gemini API key and try again later.",
+        content: userFriendlyError,
         timestamp: Date.now(),
       };
       
@@ -211,20 +238,22 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           if (c.id === currentChatId) {
             return {
               ...c,
-              messages: [...c.messages, errorMessage],
+              messages: [...c.messages, errorChatMessage],
               updatedAt: Date.now()
             };
           }
           return c;
         })
       );
+      
+      toast.error("Failed to get response from Gemini");
     } finally {
       setIsLoading(false);
     }
   };
 
   const buildPrompt = (messages: ChatMessage[]) => {
-    const homeFixesPrompt = "You are HomeFixAI, an expert in home fixes and repairs. Provide detailed, step-by-step instructions for solving common household problems. Focus on being practical, safety-conscious, and recommending the right tools and materials. Always respond directly to the user's question without including any fictional dialogue or conversation history. Address the user's current query only.\n\n";
+    const homeFixesPrompt = "You are HomeFixAI, an expert in home fixes and repairs. Provide detailed, step-by-step instructions for solving common household problems. Focus on being practical, safety-conscious, and recommending the right tools and materials. Always respond directly to the user's question without including any fictional dialogue or conversation history. Address the user's current query only. Use proper formatting with paragraphs, lists, and clear headings.\n\n";
     
     const recentMessages = messages.slice(-5);
     

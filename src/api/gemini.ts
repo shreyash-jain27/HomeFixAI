@@ -45,7 +45,9 @@ export const generateTextResponse = async (
     );
 
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorData = await response.json();
+      console.error("API Error:", errorData);
+      throw new Error(`API request failed with status ${response.status}: ${JSON.stringify(errorData)}`);
     }
 
     const result = await response.json();
@@ -81,19 +83,44 @@ export const generateImageResponse = async (
     
     // Add images to parts
     for (const imageUrl of imageUrls) {
-      // Remove the data:image/jpeg;base64, prefix
-      const base64Content = imageUrl.split(",")[1];
-      const mimeType = imageUrl.split(";")[0].split(":")[1];
-      
-      if (base64Content && mimeType) {
+      try {
+        // Remove the data:image/jpeg;base64, prefix
+        const mimeType = imageUrl.split(';')[0].replace('data:', '');
+        const base64Content = imageUrl.split(',')[1];
+        
+        if (!base64Content || !mimeType) {
+          console.error("Invalid image format:", { mimeType, hasContent: !!base64Content });
+          continue;
+        }
+        
         parts.push({
           inlineData: {
             data: base64Content,
             mimeType: mimeType,
           }
         });
+        
+        console.log("Successfully processed image with mime type:", mimeType);
+      } catch (err) {
+        console.error("Error processing image:", err);
       }
     }
+    
+    console.log(`Sending ${parts.length - 1} images to Gemini API`);
+    
+    const payload = {
+      contents: [
+        {
+          parts: parts
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 800,
+      },
+    };
+    
+    console.log("Sending request to Gemini API with payload:", JSON.stringify(payload).substring(0, 200) + "...");
     
     const response = await fetch(
       `${GEMINI_API_URL}/models/${model}:generateContent?key=${apiKey}`,
@@ -102,25 +129,18 @@ export const generateImageResponse = async (
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: parts
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
-          },
-        }),
+        body: JSON.stringify(payload),
       }
     );
 
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorData = await response.json();
+      console.error("API Error:", errorData);
+      throw new Error(`API request failed with status ${response.status}: ${JSON.stringify(errorData)}`);
     }
 
     const result = await response.json();
+    console.log("API Response received:", result);
     
     if (
       result.candidates &&

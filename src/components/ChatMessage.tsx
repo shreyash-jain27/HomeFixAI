@@ -30,7 +30,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     return (
       <div className="prose dark:prose-invert max-w-none">
         {message.content.split('\n').map((line, i) => (
-          <p key={i}>{line}</p>
+          <p key={i} className="mb-2">{line}</p>
         ))}
       </div>
     );
@@ -51,8 +51,8 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
       
       <div className="max-w-[80%]">
         <div className={cn(
-          "group relative",
-          isUser ? "chat-bubble-user" : "chat-bubble-assistant"
+          "group relative p-4 rounded-lg",
+          isUser ? "chat-bubble-user bg-primary text-primary-foreground" : "chat-bubble-assistant bg-muted"
         )}>
           {formatMessageContent()}
           
