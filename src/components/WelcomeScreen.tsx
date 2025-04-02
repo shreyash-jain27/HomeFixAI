@@ -1,10 +1,9 @@
 
 import { Wrench, Hammer, Lightbulb, PaintBucket } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
-import { Button } from "@/components/ui/button";
 
 const WelcomeScreen = () => {
-  const { geminiKey } = useChat();
+  const { geminiKey, sendMessage } = useChat();
   
   const examples = [
     { 
@@ -24,6 +23,13 @@ const WelcomeScreen = () => {
       text: "What paint should I use for my bathroom walls?" 
     }
   ];
+
+  // Handler for when an example is clicked
+  const handleExampleClick = (exampleText: string) => {
+    if (geminiKey) {
+      sendMessage(exampleText);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-6">
@@ -49,6 +55,7 @@ const WelcomeScreen = () => {
             <div 
               key={index}
               className="flex items-center p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
+              onClick={() => handleExampleClick(example.text)}
             >
               <div className="mr-4 text-primary">{example.icon}</div>
               <p>{example.text}</p>

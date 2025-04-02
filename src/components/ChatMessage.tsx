@@ -20,6 +20,22 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     setTimeout(() => setCopied(false), 2000);
   };
   
+  // Function to format the message content with proper rendering of markdown-like text
+  const formatMessageContent = () => {
+    if (isUser) {
+      return <div>{message.content}</div>;
+    }
+    
+    // Parse content and render properly
+    return (
+      <div className="prose dark:prose-invert max-w-none">
+        {message.content.split('\n').map((line, i) => (
+          <p key={i}>{line}</p>
+        ))}
+      </div>
+    );
+  };
+  
   return (
     <div
       className={cn(
@@ -38,7 +54,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           "group relative",
           isUser ? "chat-bubble-user" : "chat-bubble-assistant"
         )}>
-          {message.content}
+          {formatMessageContent()}
           
           <button 
             onClick={copyToClipboard}
