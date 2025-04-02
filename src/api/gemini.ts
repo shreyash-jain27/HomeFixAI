@@ -77,17 +77,19 @@ export const generateImageResponse = async (
 ): Promise<string> => {
   try {
     // Format message with text and images
-    const parts = [{ text: prompt }];
+    const parts: Array<{text?: string, inlineData?: {data: string, mimeType: string}}> = [{ text: prompt }];
     
     // Add images to parts
     for (const imageUrl of imageUrls) {
       // Remove the data:image/jpeg;base64, prefix
       const base64Content = imageUrl.split(",")[1];
-      if (base64Content) {
+      const mimeType = imageUrl.split(";")[0].split(":")[1];
+      
+      if (base64Content && mimeType) {
         parts.push({
-          inline_data: {
+          inlineData: {
             data: base64Content,
-            mime_type: imageUrl.split(";")[0].split(":")[1],
+            mimeType: mimeType,
           }
         });
       }

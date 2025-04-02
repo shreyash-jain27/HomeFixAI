@@ -4,7 +4,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { Button } from "@/components/ui/button";
 
 const WelcomeScreen = () => {
-  const { hfToken } = useChat();
+  const { geminiKey } = useChat();
   
   const examples = [
     { 
@@ -30,13 +30,13 @@ const WelcomeScreen = () => {
       <h1 className="text-4xl font-bold mb-2">Welcome to HomeFixAI</h1>
       <p className="text-xl text-muted-foreground mb-8">Your personal home repair assistant</p>
       
-      {!hfToken && (
+      {!geminiKey && (
         <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg mb-8 max-w-md text-center">
           <p className="text-yellow-800 dark:text-yellow-200 mb-2">
-            To use HomeFixAI, please set up your Hugging Face API token in Settings
+            To use HomeFixAI, please set up your Google Gemini API key in Settings
           </p>
           <p className="text-sm text-yellow-700 dark:text-yellow-300">
-            You can get a free token at huggingface.co
+            You can get a free key at ai.google.dev
           </p>
         </div>
       )}
