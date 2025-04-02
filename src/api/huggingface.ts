@@ -1,16 +1,16 @@
-
 /**
  * This file contains utilities for interacting with the Hugging Face API
  */
 
 // The base URL for the Hugging Face inference API
-const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models";
+const HUGGINGFACE_API_URL =
+  "https://api-inference.huggingface.co/deepseek-ai/DeepSeek-R1";
 
 // Default model for text generation
-export const DEFAULT_TEXT_MODEL = "google/gemma-7b";
+export const DEFAULT_TEXT_MODEL = "deepseek-ai/DeepSeek-R1";
 
 // Default model for image analysis
-export const DEFAULT_VISION_MODEL = "google/gemma-7b-it";
+export const DEFAULT_VISION_MODEL = "deepseek-ai/DeepSeek-R1";
 
 /**
  * Sends a text-only prompt to the Hugging Face model
@@ -42,14 +42,14 @@ export const generateTextResponse = async (
     }
 
     const result = await response.json();
-    
+
     // Handle different response formats from Hugging Face
     if (Array.isArray(result) && result[0]?.generated_text) {
       return result[0].generated_text;
     } else if (typeof result === "object" && result.generated_text) {
       return result.generated_text;
     }
-    
+
     console.log("Raw API response:", result);
     return "I couldn't generate a proper response. Please try again.";
   } catch (error) {
@@ -94,14 +94,14 @@ export const generateImageResponse = async (
     }
 
     const result = await response.json();
-    
+
     // Handle different response formats
     if (Array.isArray(result) && result[0]?.generated_text) {
       return result[0].generated_text;
     } else if (typeof result === "object" && result.generated_text) {
       return result.generated_text;
     }
-    
+
     console.log("Raw API response:", result);
     return "I couldn't analyze the image properly. Please try again.";
   } catch (error) {
