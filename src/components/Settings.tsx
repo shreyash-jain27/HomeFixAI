@@ -8,12 +8,12 @@ import { Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const SettingsPanel = () => {
-  const { hfToken, setHfToken } = useChat();
-  const [tokenInput, setTokenInput] = useState(hfToken);
+  const { geminiKey, setGeminiKey } = useChat();
+  const [keyInput, setKeyInput] = useState(geminiKey);
   
-  const handleSaveToken = () => {
-    setHfToken(tokenInput);
-    toast.success("Hugging Face token saved");
+  const handleSaveKey = () => {
+    setGeminiKey(keyInput);
+    toast.success("Google Gemini API key saved");
   };
   
   return (
@@ -33,28 +33,28 @@ const SettingsPanel = () => {
         
         <div className="py-6">
           <div className="mb-6">
-            <h3 className="text-md font-medium mb-2">Hugging Face API Token</h3>
+            <h3 className="text-md font-medium mb-2">Google Gemini API Key</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Enter your Hugging Face API token to connect to the AI model.
+              Enter your Google Gemini API key to connect to the AI model.
             </p>
             <div className="flex items-center gap-2">
               <Input
                 type="password"
-                value={tokenInput}
-                onChange={(e) => setTokenInput(e.target.value)}
-                placeholder="hf_..."
+                value={keyInput}
+                onChange={(e) => setKeyInput(e.target.value)}
+                placeholder="AIza..."
               />
-              <Button onClick={handleSaveToken}>Save</Button>
+              <Button onClick={handleSaveKey}>Save</Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Get your token at{" "}
+              Get your key at{" "}
               <a
-                href="https://huggingface.co/settings/tokens"
+                href="https://ai.google.dev/tutorials/setup"
                 target="_blank"
                 rel="noreferrer"
                 className="underline"
               >
-                huggingface.co/settings/tokens
+                ai.google.dev
               </a>
             </p>
           </div>
@@ -62,7 +62,7 @@ const SettingsPanel = () => {
           <div>
             <h3 className="text-md font-medium mb-2">About</h3>
             <p className="text-sm text-muted-foreground">
-              HomeFixAI uses Hugging Face's Gemma models to provide helpful advice 
+              HomeFixAI uses Google's Gemini models to provide helpful advice 
               for your home repair questions. You can upload images of your repair issues
               for more specific guidance.
             </p>

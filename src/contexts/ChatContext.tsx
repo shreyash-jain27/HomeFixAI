@@ -1,6 +1,7 @@
+
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { generateTextResponse, generateImageResponse } from '../api/huggingface';
+import { generateTextResponse, generateImageResponse } from '../api/gemini';
 
 export type MessageRole = 'user' | 'assistant';
 
@@ -25,8 +26,8 @@ interface ChatContextType {
   currentChatId: string | null;
   isLoading: boolean;
   error: string | null;
-  hfToken: string;
-  setHfToken: (token: string) => void;
+  geminiKey: string;
+  setGeminiKey: (token: string) => void;
   createNewChat: () => void;
   setCurrentChat: (chatId: string) => void;
   sendMessage: (message: string, imageFiles?: File[]) => Promise<void>;
@@ -41,8 +42,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [hfToken, setHfToken] = useState<string>(() => {
-    return localStorage.getItem('hf_token') || '';
+  const [geminiKey, setGeminiKey] = useState<string>(() => {
+    return localStorage.getItem('gemini_key') || '';
   });
 
   useEffect(() => {
@@ -70,10 +71,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   }, [chats]);
 
   useEffect(() => {
-    if (hfToken) {
-      localStorage.setItem('hf_token', hfToken);
+    if (geminiKey) {
+      localStorage.setItem('gemini_key', geminiKey);
     }
-  }, [hfToken]);
+  }, [geminiKey]);
 
   const createNewChat = () => {
     const newChat: Chat = {
@@ -103,8 +104,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setCurrentChatId(newChatId);
     }
     
-    if (!hfToken) {
-      toast.error("Please set your Hugging Face token in the settings");
+    if (!geminiKey) {
+      toast.error("Please set your Google Gemini API key in the settings");
       return;
     }
     
@@ -166,12 +167,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         responseText = await generateImageResponse(
           prompt,
           images,
-          hfToken
+          geminiKey
         );
       } else {
         responseText = await generateTextResponse(
           prompt,
-          hfToken
+          geminiKey
         );
       }
       
@@ -201,7 +202,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: "I'm having trouble connecting right now. Please check your Hugging Face token and try again later.",
+        content: "I'm having trouble connecting right now. Please check your Google Gemini API key and try again later.",
         timestamp: Date.now(),
       };
       
@@ -259,8 +260,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       currentChatId,
       isLoading,
       error,
-      hfToken,
-      setHfToken,
+      geminiKey,
+      setGeminiKey,
       createNewChat,
       setCurrentChat,
       sendMessage,

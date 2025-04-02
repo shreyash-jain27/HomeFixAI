@@ -7,7 +7,7 @@ import { Send, Paperclip, X } from "lucide-react";
 import SettingsPanel from "./Settings";
 
 const ChatInput = () => {
-  const { sendMessage, isLoading, hfToken } = useChat();
+  const { sendMessage, isLoading, geminiKey } = useChat();
   const [message, setMessage] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,7 +21,7 @@ const ChatInput = () => {
   };
   
   const handleSendMessage = async () => {
-    if ((message.trim() || images.length > 0) && hfToken) {
+    if ((message.trim() || images.length > 0) && geminiKey) {
       await sendMessage(message, images);
       setMessage("");
       setImages([]);
@@ -100,7 +100,7 @@ const ChatInput = () => {
             type="button" 
             size="icon"
             onClick={handleSendMessage}
-            disabled={(!message.trim() && images.length === 0) || isLoading || !hfToken}
+            disabled={(!message.trim() && images.length === 0) || isLoading || !geminiKey}
           >
             <Send className="h-5 w-5" />
           </Button>
