@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ChatMessage as ChatMessageType } from "@/contexts/ChatContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -83,6 +84,25 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     );
   };
 
+  const renderHeading = (content: string, level: number) => {
+    switch (level) {
+      case 1:
+        return <h1 className="text-2xl font-bold my-3">{content}</h1>;
+      case 2:
+        return <h2 className="text-xl font-bold my-2.5">{content}</h2>;
+      case 3:
+        return <h3 className="text-lg font-bold my-2">{content}</h3>;
+      case 4:
+        return <h4 className="text-base font-bold my-1.5">{content}</h4>;
+      case 5:
+        return <h5 className="text-sm font-bold my-1">{content}</h5>;
+      case 6:
+        return <h6 className="text-xs font-bold my-0.5">{content}</h6>;
+      default:
+        return <h2 className="text-xl font-bold my-2.5">{content}</h2>;
+    }
+  };
+
   const formatMessageContent = () => {
     if (isUser) {
       return <div>{message.content}</div>;
@@ -142,10 +162,9 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
       } else {
         let text = segment.content;
         
-        text = text.replace(headingRegex, (match, hashmarks, heading) => {
-          const level = hashmarks.length;
-          const className = `text-${'xl lg md sm xs xs'.split(' ')[level - 1]} font-bold my-2`;
-          return `<h${level} class="${className}">${heading}</h${level}>`;
+        // Process headings first - convert markdown headings to actual heading elements
+        let processedText = text.replace(headingRegex, (match, hashmarks, heading) => {
+          return `<h${hashmarks.length}>${heading}</h${hashmarks.length}>`;
         });
         
         let inlineCodeMatches = [];
@@ -185,7 +204,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           });
         }
         
-        const paragraphs = text.split(/\n\n+/).filter(Boolean);
+        const paragraphs = processedText.split(/\n\n+/).filter(Boolean);
         
         parts.push(
           <div key={`text-${idx}`} className="mb-4">
@@ -212,9 +231,18 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
               } else {
                 let processed = para;
                 
-                processed = processed.replace(/<h(\d) class="([^"]+)">(.+)<\/h\1>/g, (match, level, className, content) => {
-                  return `<h${level}>${content}</h${level}>`;
-                });
+                // Extract and process headings
+                const headingTagRegex = /<h(\d)>(.+?)<\/h\1>/g;
+                let headingMatches = [];
+                let headingMatch;
+                while ((headingMatch = headingTagRegex.exec(processed)) !== null) {
+                  headingMatches.push({
+                    fullMatch: headingMatch[0],
+                    level: parseInt(headingMatch[1]),
+                    content: headingMatch[2],
+                    index: headingMatch.index
+                  });
+                }
                 
                 inlineCodeMatches.forEach(match => {
                   if (processed.includes(match.fullMatch)) {
@@ -245,29 +273,39 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 });
                 
                 const renderHTML = (html) => {
-                  const parts = [];
-                  let remainingHtml = html;
-                  
-                  const headingRegex = /<h(\d)>(.+?)<\/h\1>/g;
-                  let headingMatch;
-                  while ((headingMatch = headingRegex.exec(html)) !== null) {
-                    const [fullMatch, level, content] = headingMatch;
-                    const beforeHeading = remainingHtml.substring(0, remainingHtml.indexOf(fullMatch));
-                    if (beforeHeading) {
-                      parts.push(<span key={`text-${parts.length}`}>{beforeHeading}</span>);
+                  // Check if we have any heading tags to process
+                  if (headingMatches.length > 0) {
+                    const elements = [];
+                    let currentText = html;
+                    
+                    // Sort heading matches by their position in the text
+                    headingMatches.sort((a, b) => a.index - b.index);
+                    
+                    headingMatches.forEach((heading, i) => {
+                      const beforeHeading = currentText.substring(0, currentText.indexOf(heading.fullMatch));
+                      if (beforeHeading) {
+                        elements.push(renderInnerHTML(beforeHeading, i));
+                      }
+                      
+                      elements.push(renderHeading(heading.content, heading.level));
+                      
+                      currentText = currentText.substring(currentText.indexOf(heading.fullMatch) + heading.fullMatch.length);
+                    });
+                    
+                    if (currentText) {
+                      elements.push(renderInnerHTML(currentText, headingMatches.length));
                     }
                     
-                    parts.push(
-                      <span 
-                        key={`heading-${parts.length}`} 
-                        className={`block font-bold ${level === '1' ? 'text-xl' : level === '2' ? 'text-lg' : 'text-base'} my-2`}
-                      >
-                        {content}
-                      </span>
-                    );
-                    
-                    remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
+                    return elements;
+                  } else {
+                    return renderInnerHTML(html, 0);
                   }
+                };
+                
+                // Helper function to render non-heading HTML content
+                const renderInnerHTML = (html, key) => {
+                  const parts = [];
+                  let remainingHtml = html;
                   
                   const inlineCodeRegex = /<code>(.+?)<\/code>/g;
                   let codeMatch;
@@ -275,7 +313,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     const [fullMatch, code] = codeMatch;
                     const beforeCode = remainingHtml.substring(0, remainingHtml.indexOf(fullMatch));
                     if (beforeCode) {
-                      parts.push(<span key={`text-${parts.length}`}>{beforeCode}</span>);
+                      parts.push(<span key={`text-${parts.length}-${key}`}>{beforeCode}</span>);
                     }
                     
                     parts.push(renderInlineCode(code));
@@ -289,10 +327,10 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     const [fullMatch, content] = boldMatch;
                     const beforeBold = remainingHtml.substring(0, remainingHtml.indexOf(fullMatch));
                     if (beforeBold) {
-                      parts.push(<span key={`text-${parts.length}`}>{beforeBold}</span>);
+                      parts.push(<span key={`text-${parts.length}-${key}`}>{beforeBold}</span>);
                     }
                     
-                    parts.push(<strong key={`bold-${parts.length}`}>{content}</strong>);
+                    parts.push(<strong key={`bold-${parts.length}-${key}`} className="font-bold">{content}</strong>);
                     
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
@@ -303,10 +341,10 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     const [fullMatch, content] = italicMatch;
                     const beforeItalic = remainingHtml.substring(0, remainingHtml.indexOf(fullMatch));
                     if (beforeItalic) {
-                      parts.push(<span key={`text-${parts.length}`}>{beforeItalic}</span>);
+                      parts.push(<span key={`text-${parts.length}-${key}`}>{beforeItalic}</span>);
                     }
                     
-                    parts.push(<em key={`italic-${parts.length}`}>{content}</em>);
+                    parts.push(<em key={`italic-${parts.length}-${key}`}>{content}</em>);
                     
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
@@ -317,7 +355,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     const [fullMatch, url, text] = linkMatch;
                     const beforeLink = remainingHtml.substring(0, remainingHtml.indexOf(fullMatch));
                     if (beforeLink) {
-                      parts.push(<span key={`text-${parts.length}`}>{beforeLink}</span>);
+                      parts.push(<span key={`text-${parts.length}-${key}`}>{beforeLink}</span>);
                     }
                     
                     parts.push(renderLink(text, url));
@@ -326,13 +364,13 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                   }
                   
                   if (remainingHtml) {
-                    parts.push(<span key={`text-${parts.length}`}>{remainingHtml}</span>);
+                    parts.push(<span key={`text-${parts.length}-${key}`}>{remainingHtml}</span>);
                   }
                   
-                  return parts;
+                  return parts.length > 0 ? parts : null;
                 };
                 
-                return <p key={i} className="mb-2">{renderHTML(processed)}</p>;
+                return <div key={i} className="mb-2">{renderHTML(processed)}</div>;
               }
             })}
           </div>

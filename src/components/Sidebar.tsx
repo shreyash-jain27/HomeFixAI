@@ -45,7 +45,15 @@ const Sidebar = ({ onCloseSidebar }: SidebarProps) => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 flex items-center">
-        <Home className="mr-2" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          aria-label="Home"
+          onClick={onCloseSidebar}
+          className="mr-2 transition-transform hover:rotate-12 active:scale-95"
+        >
+          <Home className="w-5 h-5" />
+        </Button>
         <h1 className="font-semibold text-lg">HomeFixAI</h1>
       </div>
       
