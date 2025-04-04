@@ -1,10 +1,11 @@
+
 /**
  * This file contains utilities for interacting with the Hugging Face API
  */
 
 // The base URL for the Hugging Face inference API
 const HUGGINGFACE_API_URL =
-  "https://api-inference.huggingface.co/deepseek-ai/DeepSeek-R1";
+  "https://api-inference.huggingface.co/models";
 
 // Default model for text generation
 export const DEFAULT_TEXT_MODEL = "deepseek-ai/DeepSeek-R1";

@@ -1,3 +1,4 @@
+
 /**
  * This file contains utilities for interacting with the Google Gemini API
  */
@@ -7,7 +8,7 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta";
 
 // Default models
 export const DEFAULT_TEXT_MODEL = "gemini-1.5-pro";
-export const DEFAULT_VISION_MODEL = "gemini-2.0-flash";
+export const DEFAULT_VISION_MODEL = "gemini-1.5-pro-vision";
 
 /**
  * Sends a text-only prompt to the Gemini model
@@ -81,16 +82,16 @@ export const generateImageResponse = async (
   model: string = DEFAULT_VISION_MODEL
 ): Promise<string> => {
   try {
-    // Format message with text and images
-    const parts: Array<{
-      text?: string;
-      inlineData?: { data: string; mimeType: string };
-    }> = [{ text: prompt }];
+    const parts = [
+      {
+        text: prompt,
+      },
+    ];
 
-    // Add images to parts
+    // Add images to parts array
     for (const imageUrl of imageUrls) {
       try {
-        // Remove the data:image/jpeg;base64, prefix
+        // Extract mime type and base64 content
         const mimeType = imageUrl.split(";")[0].replace("data:", "");
         const base64Content = imageUrl.split(",")[1];
 
@@ -103,9 +104,9 @@ export const generateImageResponse = async (
         }
 
         parts.push({
-          inlineData: {
+          inline_data: {
+            mime_type: mimeType,
             data: base64Content,
-            mimeType: mimeType,
           },
         });
 
@@ -115,24 +116,7 @@ export const generateImageResponse = async (
       }
     }
 
-    console.log(`Sending ${parts.length - 1} images to Gemini API`);
-
-    const payload = {
-      contents: [
-        {
-          parts: parts,
-        },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 800,
-      },
-    };
-
-    console.log(
-      "Sending request to Gemini API with payload:",
-      JSON.stringify(payload).substring(0, 200) + "..."
-    );
+    console.log(`Sending request with ${parts.length - 1} images to Gemini API`);
 
     const response = await fetch(
       `${GEMINI_API_URL}/models/${model}:generateContent?key=${apiKey}`,
@@ -141,7 +125,17 @@ export const generateImageResponse = async (
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: parts
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 800,
+          },
+        }),
       }
     );
 
