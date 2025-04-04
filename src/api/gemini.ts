@@ -73,6 +73,17 @@ export const generateTextResponse = async (
 };
 
 /**
+ * Type definition for part in the Gemini API request
+ */
+interface GeminiPart {
+  text?: string;
+  inlineData?: {
+    mimeType: string;
+    data: string;
+  };
+}
+
+/**
  * Sends a prompt with images to the Gemini model for analysis
  */
 export const generateImageResponse = async (
@@ -82,7 +93,7 @@ export const generateImageResponse = async (
   model: string = DEFAULT_VISION_MODEL
 ): Promise<string> => {
   try {
-    const parts = [
+    const parts: GeminiPart[] = [
       {
         text: prompt,
       },
@@ -104,8 +115,8 @@ export const generateImageResponse = async (
         }
 
         parts.push({
-          inline_data: {
-            mime_type: mimeType,
+          inlineData: {
+            mimeType: mimeType,
             data: base64Content,
           },
         });

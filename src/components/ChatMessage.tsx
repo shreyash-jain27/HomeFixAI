@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChatMessage as ChatMessageType } from "@/contexts/ChatContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
@@ -20,7 +19,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     setTimeout(() => setCopied(false), 2000);
   };
   
-  // Function to render code blocks with proper formatting and language
   const renderCodeBlock = (code: string, language: string = '') => {
     return (
       <div className="relative my-2 rounded-md bg-muted/50 dark:bg-muted/80">
@@ -47,7 +45,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     );
   };
 
-  // Function to render inline code
   const renderInlineCode = (code: string) => {
     return (
       <code className="px-1.5 py-0.5 rounded bg-muted/50 dark:bg-muted/80 font-mono text-sm">
@@ -56,7 +53,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     );
   };
 
-  // Function to render lists
   const renderList = (items: string[], ordered: boolean) => {
     return ordered ? (
       <ol className="list-decimal ml-6 my-2">
@@ -73,7 +69,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     );
   };
 
-  // Function to render links
   const renderLink = (text: string, url: string) => {
     return (
       <a 
@@ -88,18 +83,15 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     );
   };
 
-  // Function to format the message content with proper markdown-like rendering
   const formatMessageContent = () => {
     if (isUser) {
       return <div>{message.content}</div>;
     }
 
-    // Parse content for markdown elements
     const parts = [];
     const content = message.content;
     let currentIndex = 0;
 
-    // Regular expressions for markdown elements
     const codeBlockRegex = /```([a-zA-Z]*)\n([\s\S]*?)```/g;
     const inlineCodeRegex = /`([^`]+)`/g;
     const headingRegex = /^(#{1,6})\s+(.+)$/gm;
@@ -109,7 +101,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     const boldRegex = /\*\*([^*]+)\*\*/g;
     const italicRegex = /\*([^*]+)\*/g;
     
-    // Find code blocks first
     let match;
     const segments = [];
     let lastIndex = 0;
@@ -141,7 +132,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
       });
     }
     
-    // Process each segment
     segments.forEach((segment, idx) => {
       if (segment.type === 'code-block') {
         parts.push(
@@ -150,17 +140,14 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           </div>
         );
       } else {
-        // Process text segments for other markdown elements
         let text = segment.content;
         
-        // Process headings
         text = text.replace(headingRegex, (match, hashmarks, heading) => {
           const level = hashmarks.length;
           const className = `text-${'xl lg md sm xs xs'.split(' ')[level - 1]} font-bold my-2`;
           return `<h${level} class="${className}">${heading}</h${level}>`;
         });
         
-        // Process inline code
         let inlineCodeMatches = [];
         while ((match = inlineCodeRegex.exec(text)) !== null) {
           inlineCodeMatches.push({
@@ -170,7 +157,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           });
         }
         
-        // Process bold
         let boldMatches = [];
         while ((match = boldRegex.exec(text)) !== null) {
           boldMatches.push({
@@ -180,7 +166,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           });
         }
         
-        // Process italic
         let italicMatches = [];
         while ((match = italicRegex.exec(text)) !== null) {
           italicMatches.push({
@@ -190,7 +175,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           });
         }
         
-        // Process links
         let linkMatches = [];
         while ((match = linkRegex.exec(text)) !== null) {
           linkMatches.push({
@@ -201,18 +185,15 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           });
         }
         
-        // Split text by paragraphs
         const paragraphs = text.split(/\n\n+/).filter(Boolean);
         
         parts.push(
           <div key={`text-${idx}`} className="mb-4">
             {paragraphs.map((para, i) => {
-              // Identify if this paragraph is a list
-              const listMatch = para.match(listRegex);
-              const orderedListMatch = para.match(orderedListRegex);
+              let listMatch = para.match(listRegex);
+              let orderedListMatch = para.match(orderedListRegex);
               
               if (listMatch) {
-                // Extract list items
                 const items = [];
                 let listItem;
                 const listItemRegex = /^(\s*)[-*+]\s+(.+)$/gm;
@@ -221,7 +202,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 }
                 return renderList(items, false);
               } else if (orderedListMatch) {
-                // Extract ordered list items
                 const items = [];
                 let listItem;
                 const listItemRegex = /^(\s*)\d+\.\s+(.+)$/gm;
@@ -230,15 +210,12 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 }
                 return renderList(items, true);
               } else {
-                // Regular paragraph processing
                 let processed = para;
                 
-                // Replace HTML-like tags from heading processing
                 processed = processed.replace(/<h(\d) class="([^"]+)">(.+)<\/h\1>/g, (match, level, className, content) => {
                   return `<h${level}>${content}</h${level}>`;
                 });
                 
-                // Handle inline code
                 inlineCodeMatches.forEach(match => {
                   if (processed.includes(match.fullMatch)) {
                     const parts = processed.split(match.fullMatch);
@@ -246,7 +223,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                   }
                 });
                 
-                // Handle bold
                 boldMatches.forEach(match => {
                   if (processed.includes(match.fullMatch)) {
                     const parts = processed.split(match.fullMatch);
@@ -254,7 +230,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                   }
                 });
                 
-                // Handle italic
                 italicMatches.forEach(match => {
                   if (processed.includes(match.fullMatch)) {
                     const parts = processed.split(match.fullMatch);
@@ -262,7 +237,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                   }
                 });
                 
-                // Handle links
                 linkMatches.forEach(match => {
                   if (processed.includes(match.fullMatch)) {
                     const parts = processed.split(match.fullMatch);
@@ -270,12 +244,10 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                   }
                 });
                 
-                // Final rendering with HTML components
                 const renderHTML = (html) => {
                   const parts = [];
                   let remainingHtml = html;
                   
-                  // Process headings
                   const headingRegex = /<h(\d)>(.+?)<\/h\1>/g;
                   let headingMatch;
                   while ((headingMatch = headingRegex.exec(html)) !== null) {
@@ -297,7 +269,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
                   
-                  // Process inline code
                   const inlineCodeRegex = /<code>(.+?)<\/code>/g;
                   let codeMatch;
                   while ((codeMatch = inlineCodeRegex.exec(remainingHtml)) !== null) {
@@ -312,7 +283,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
                   
-                  // Process bold
                   const boldRegex = /<strong>(.+?)<\/strong>/g;
                   let boldMatch;
                   while ((boldMatch = boldRegex.exec(remainingHtml)) !== null) {
@@ -327,7 +297,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
                   
-                  // Process italic
                   const italicRegex = /<em>(.+?)<\/em>/g;
                   let italicMatch;
                   while ((italicMatch = italicRegex.exec(remainingHtml)) !== null) {
@@ -342,7 +311,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
                   
-                  // Process links
                   const linkRegex = /<a href="([^"]+)">(.+?)<\/a>/g;
                   let linkMatch;
                   while ((linkMatch = linkRegex.exec(remainingHtml)) !== null) {
@@ -357,7 +325,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     remainingHtml = remainingHtml.substring(remainingHtml.indexOf(fullMatch) + fullMatch.length);
                   }
                   
-                  // Add any remaining HTML
                   if (remainingHtml) {
                     parts.push(<span key={`text-${parts.length}`}>{remainingHtml}</span>);
                   }
@@ -373,7 +340,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
       }
     });
 
-    // If no markdown elements were found, just render the text normally
     if (parts.length === 0) {
       parts.push(
         <div key="text" className="mb-4">
@@ -397,7 +363,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
       </div>
     );
   };
-  
+
   return (
     <div
       className={cn(
@@ -430,7 +396,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           </button>
         </div>
         
-        {/* Display images if present */}
         {message.images && message.images.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.images.map((image, index) => (
