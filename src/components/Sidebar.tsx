@@ -42,6 +42,12 @@ const Sidebar = ({ onCloseSidebar }: SidebarProps) => {
     }
   };
   
+  const handleHomeButtonClick = () => {
+    if (onCloseSidebar) {
+      onCloseSidebar();
+    }
+  };
+  
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 flex items-center">
@@ -49,7 +55,7 @@ const Sidebar = ({ onCloseSidebar }: SidebarProps) => {
           variant="ghost" 
           size="icon" 
           aria-label="Home"
-          onClick={onCloseSidebar}
+          onClick={handleHomeButtonClick}
           className="mr-2 transition-transform hover:rotate-12 active:scale-95"
         >
           <Home className="w-5 h-5" />
