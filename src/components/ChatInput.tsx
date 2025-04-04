@@ -23,7 +23,7 @@ const ChatInput = () => {
   const handleSendMessage = async () => {
     if ((message.trim() || images.length > 0) && geminiKey) {
       await sendMessage(message, images);
-      setMessage("");
+      setMessage(""); // Clear the input after sending
       setImages([]);
     }
   };

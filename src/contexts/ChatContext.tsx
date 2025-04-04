@@ -1,4 +1,3 @@
-
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { generateTextResponse, generateImageResponse } from '../api/gemini';
@@ -253,16 +252,29 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const buildPrompt = (messages: ChatMessage[]) => {
-    const homeFixesPrompt = "You are HomeFixAI, an expert in home fixes and repairs. Provide detailed, step-by-step instructions for solving common household problems. Focus on being practical, safety-conscious, and recommending the right tools and materials. Always respond directly to the user's question without including any fictional dialogue or conversation history. Address the user's current query only. Use proper formatting with paragraphs, lists, and clear headings.\n\n";
+    const homeFixesPrompt = `You are HomeFixAI, an expert in home repairs, DIY projects, and household maintenance. 
+    
+You provide detailed, step-by-step instructions for solving common household problems and answering questions about home improvement. 
+
+Focus on:
+- Practical, actionable advice for homeowners and DIY enthusiasts
+- Safety-conscious recommendations and precautions
+- Suggesting appropriate tools and materials for each job
+- Explaining when a professional is needed instead of DIY
+- Using proper markdown formatting with headers, lists, and emphasis
+
+Always format your responses with clear headings (using # syntax), organized lists, and highlight important safety warnings with bold text (**warning**).
+
+Always respond directly to the user's question without including any fictional dialogue or conversation history. Address the user's current query only.`;
     
     const recentMessages = messages.slice(-5);
     
     const conversationHistory = recentMessages.map(msg => {
       const role = msg.role === 'user' ? 'User' : 'Assistant';
       return `${role}: ${msg.content}`;
-    }).join('\n');
+    }).join('\n\n');
     
-    return `${homeFixesPrompt}${conversationHistory}\n\nAssistant:`;
+    return `${homeFixesPrompt}\n\n${conversationHistory}\n\nAssistant:`;
   };
 
   const deleteChat = (chatId: string) => {
