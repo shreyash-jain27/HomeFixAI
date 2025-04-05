@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@/contexts/ChatContext";
 import { Send, Paperclip, X } from "lucide-react";
-import SettingsPanel from "./Settings";
+import { toast } from "sonner";
 
 const ChatInput = () => {
   const { sendMessage, isLoading, geminiKey } = useChat();
@@ -21,7 +21,7 @@ const ChatInput = () => {
   };
   
   const handleSendMessage = async () => {
-    if ((message.trim() || images.length > 0) && geminiKey) {
+    if (message.trim() || images.length > 0) {
       await sendMessage(message, images);
       setMessage(""); // Clear the input after sending
       setImages([]);
@@ -93,8 +93,6 @@ const ChatInput = () => {
           >
             <Paperclip className="h-5 w-5" />
           </Button>
-          
-          <SettingsPanel />
           
           <Button 
             type="button" 

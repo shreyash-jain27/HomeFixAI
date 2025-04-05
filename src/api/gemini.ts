@@ -1,4 +1,3 @@
-
 /**
  * This file contains utilities for interacting with the Google Gemini API
  */
@@ -8,7 +7,7 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta";
 
 // Default models
 export const DEFAULT_TEXT_MODEL = "gemini-1.5-pro";
-export const DEFAULT_VISION_MODEL = "gemini-1.5-pro-vision";
+export const DEFAULT_VISION_MODEL = "gemini-2.0-flash";
 
 /**
  * Sends a text-only prompt to the Gemini model
@@ -38,7 +37,7 @@ export const generateTextResponse = async (
           ],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 800,
+            maxOutputTokens: 2048,
           },
         }),
       }
@@ -127,7 +126,9 @@ export const generateImageResponse = async (
       }
     }
 
-    console.log(`Sending request with ${parts.length - 1} images to Gemini API`);
+    console.log(
+      `Sending request with ${parts.length - 1} images to Gemini API`
+    );
 
     const response = await fetch(
       `${GEMINI_API_URL}/models/${model}:generateContent?key=${apiKey}`,
@@ -139,7 +140,7 @@ export const generateImageResponse = async (
         body: JSON.stringify({
           contents: [
             {
-              parts: parts
+              parts: parts,
             },
           ],
           generationConfig: {

@@ -1,15 +1,13 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useChat } from "@/contexts/ChatContext";
 import { Settings as SettingsIcon } from "lucide-react";
-import { toast } from "sonner";
 
 const SettingsPanel = () => {
+  const [open, setOpen] = useState(false);
+  
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon">
           <SettingsIcon className="h-5 w-5" />
@@ -24,7 +22,6 @@ const SettingsPanel = () => {
         </SheetHeader>
         
         <div className="py-6">
-          
           <div>
             <h3 className="text-md font-medium mb-2">About</h3>
             <p className="text-sm text-muted-foreground">

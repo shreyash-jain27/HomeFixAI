@@ -5,9 +5,10 @@ import ChatArea from './ChatArea';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const ChatLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
   
   const toggleSidebar = () => {
@@ -16,29 +17,15 @@ const ChatLayout = () => {
   
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Mobile sidebar toggle */}
-      {isMobile && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 md:hidden"
-        >
-          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-        </Button>
-      )}
-      
       {/* Sidebar */}
       <div
-        className={`${
-          isMobile
-            ? `fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out ${
-                sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-              }`
-            : 'w-80 flex-shrink-0'
-        } bg-sidebar border-r border-sidebar-border`}
+        className={cn(
+          "fixed md:relative inset-y-0 left-0 z-40 transform transition-all duration-300 ease-in-out",
+          sidebarOpen ? "translate-x-0 w-80" : "translate-x-0 w-16 md:w-16",
+          "bg-sidebar border-r border-sidebar-border"
+        )}
       >
-        <Sidebar onCloseSidebar={() => setSidebarOpen(false)} />
+        <Sidebar onCloseSidebar={toggleSidebar} isCollapsed={!sidebarOpen} />
       </div>
       
       {/* Chat area */}

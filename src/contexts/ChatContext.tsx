@@ -25,8 +25,7 @@ interface ChatContextType {
   currentChatId: string | null;
   isLoading: boolean;
   error: string | null;
-  geminiKey: string;
-  setGeminiKey: (token: string) => void;
+  geminiKey: string | undefined;
   createNewChat: () => void;
   setCurrentChat: (chatId: string) => void;
   sendMessage: (message: string, imageFiles?: File[]) => Promise<void>;
@@ -41,11 +40,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [geminiKey, setGeminiKey] = useState<string>(() => {
-    return localStorage.getItem('gemini_key') || '';
-  });
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
   useEffect(() => {
+
     const savedChats = localStorage.getItem('chats');
     if (savedChats) {
       try {
@@ -69,11 +67,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [chats]);
 
-  useEffect(() => {
-    if (geminiKey) {
-      localStorage.setItem('gemini_key', geminiKey);
-    }
-  }, [geminiKey]);
 
   const createNewChat = () => {
     const newChat: Chat = {
@@ -252,29 +245,39 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const buildPrompt = (messages: ChatMessage[]) => {
-    const homeFixesPrompt = `You are HomeFixAI, an expert in home repairs, DIY projects, and household maintenance. 
+    const assistantPrompt = `You are HomeFixAI, a friendly and knowledgeable AI assistant focused on home repairs, maintenance, and DIY projects. Your primary expertise covers:
+
+- Home repairs and maintenance
+- DIY home improvement projects
+- Home safety and preventive maintenance
+- Tools and materials for home projects
+- Basic home systems (plumbing, electrical, HVAC)
+
+For casual greetings or general conversation starters (like "hi", "hello", "how are you"), respond warmly while introducing your purpose:
+"Hello! I'm HomeFixAI, your friendly home improvement assistant. I'm here to help with any questions about home repairs, maintenance, or DIY projects. What can I help you with today?"
+
+For non-home-related questions, respond politely:
+"I appreciate your question! While I'm a friendly AI, I specialize in home repairs and DIY projects. I'd be happy to help you with any home-related questions you have!"
+
+When answering relevant questions:
+- Provide comprehensive, detailed responses
+- Break down complex answers into clear sections
+- Include step-by-step instructions when applicable
+- Always address safety considerations first
+- List all necessary tools and materials
+- Explain when professional help is needed
+- Use clear, practical examples
+
+Ensure your responses are complete, thorough, and maintain a helpful, friendly tone.`;
     
-You provide detailed, step-by-step instructions for solving common household problems and answering questions about home improvement. 
-
-Focus on:
-- Practical, actionable advice for homeowners and DIY enthusiasts
-- Safety-conscious recommendations and precautions
-- Suggesting appropriate tools and materials for each job
-- Explaining when a professional is needed instead of DIY
-- Using proper markdown formatting with headers, lists, and emphasis
-
-Always format your responses with clear headings (using # syntax), organized lists, and highlight important safety warnings with bold text (**warning**).
-
-Always respond directly to the user's question without including any fictional dialogue or conversation history. Address the user's current query only.`;
-    
-    const recentMessages = messages.slice(-5);
+    const recentMessages = messages.slice(-10);
     
     const conversationHistory = recentMessages.map(msg => {
       const role = msg.role === 'user' ? 'User' : 'Assistant';
       return `${role}: ${msg.content}`;
     }).join('\n\n');
     
-    return `${homeFixesPrompt}\n\n${conversationHistory}\n\nAssistant:`;
+    return `${assistantPrompt}\n\n${conversationHistory}\n\nAssistant: Let me provide a detailed and complete response to your question.`;
   };
 
   const deleteChat = (chatId: string) => {
@@ -302,7 +305,6 @@ Always respond directly to the user's question without including any fictional d
       isLoading,
       error,
       geminiKey,
-      setGeminiKey,
       createNewChat,
       setCurrentChat,
       sendMessage,

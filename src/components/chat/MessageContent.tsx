@@ -108,20 +108,41 @@ const renderInlineCode = (code: string) => {
   );
 };
 
-// Helper function for lists
+// Helper function for lists with inline formatting support
 const renderList = (items: string[], ordered: boolean) => {
-  return ordered ? (
-    <ol className="list-decimal ml-6 my-2">
+  const ListComponent = ordered ? 'ol' : 'ul';
+  const listClass = ordered ? 'list-decimal' : 'list-disc';
+  
+  return (
+    <ListComponent className={`${listClass} ml-6 my-2`}>
       {items.map((item, i) => (
-        <li key={i} className="mb-1">{item}</li>
+        <li key={i} className="mb-1">
+          {processInlineFormatting(item)}
+        </li>
       ))}
-    </ol>
-  ) : (
-    <ul className="list-disc ml-6 my-2">
-      {items.map((item, i) => (
-        <li key={i} className="mb-1">{item}</li>
-      ))}
-    </ul>
+    </ListComponent>
+  );
+};
+
+// Helper function for headings with inline formatting support
+const renderHeading = (content: string, level: number) => {
+  const baseStyles = "font-semibold text-foreground mb-4";
+  const HeadingComponent = `h${level}` as keyof JSX.IntrinsicElements;
+  
+  let sizeClass = 'text-lg';
+  switch (level) {
+    case 1: sizeClass = 'text-2xl'; break;
+    case 2: sizeClass = 'text-xl'; break;
+    case 3: sizeClass = 'text-lg'; break;
+    case 4: sizeClass = 'text-base'; break;
+    case 5: sizeClass = 'text-sm'; break;
+    case 6: sizeClass = 'text-xs'; break;
+  }
+  
+  return (
+    <HeadingComponent className={`${baseStyles} ${sizeClass}`}>
+      {processInlineFormatting(content)}
+    </HeadingComponent>
   );
 };
 
@@ -141,22 +162,24 @@ const renderLink = (text: string, url: string) => {
 };
 
 // Helper function for headings with proper rendering
-const renderHeading = (content: string, level: number) => {
+const renderHeadingElement = (content: string, level: number) => {
+  const baseStyles = "font-semibold text-foreground mb-4";
+  
   switch (level) {
     case 1:
-      return <h1 className="text-2xl font-bold my-3">{content}</h1>;
+      return <h1 className={`${baseStyles} text-2xl`}>{content}</h1>;
     case 2:
-      return <h2 className="text-xl font-bold my-2.5">{content}</h2>;
+      return <h2 className={`${baseStyles} text-xl`}>{content}</h2>;
     case 3:
-      return <h3 className="text-lg font-bold my-2">{content}</h3>;
+      return <h3 className={`${baseStyles} text-lg`}>{content}</h3>;
     case 4:
-      return <h4 className="text-base font-bold my-1.5">{content}</h4>;
+      return <h4 className={`${baseStyles} text-base`}>{content}</h4>;
     case 5:
-      return <h5 className="text-sm font-bold my-1">{content}</h5>;
+      return <h5 className={`${baseStyles} text-sm`}>{content}</h5>;
     case 6:
-      return <h6 className="text-xs font-bold my-0.5">{content}</h6>;
+      return <h6 className={`${baseStyles} text-xs`}>{content}</h6>;
     default:
-      return <h2 className="text-xl font-bold my-2.5">{content}</h2>;
+      return <h2 className={`${baseStyles} text-xl`}>{content}</h2>;
   }
 };
 
@@ -166,7 +189,7 @@ const processTextSegment = (text: string) => {
   const paragraphs = text.split(/\n\n+/).filter(Boolean);
   
   return paragraphs.map((para, paraIndex) => {
-    // Check for headings (## Heading)
+    // Check for headings
     const headingMatch = para.match(/^(#{1,6})\s+(.+)$/);
     if (headingMatch) {
       const level = headingMatch[1].length;
@@ -174,19 +197,18 @@ const processTextSegment = (text: string) => {
       return <React.Fragment key={`para-${paraIndex}`}>{renderHeading(content, level)}</React.Fragment>;
     }
     
-    // Check for unordered lists
+    // Check for lists
     if (para.trim().startsWith('* ') || para.trim().startsWith('- ')) {
       const items = para.split(/\n/).map(line => line.replace(/^[*-]\s+/, '').trim()).filter(Boolean);
       return <React.Fragment key={`para-${paraIndex}`}>{renderList(items, false)}</React.Fragment>;
     }
     
-    // Check for ordered lists
     if (/^\d+\.\s/.test(para.trim())) {
       const items = para.split(/\n/).map(line => line.replace(/^\d+\.\s+/, '').trim()).filter(Boolean);
       return <React.Fragment key={`para-${paraIndex}`}>{renderList(items, true)}</React.Fragment>;
     }
     
-    // Process bold text and other inline formatting within paragraph
+    // Process inline formatting
     return (
       <p key={`para-${paraIndex}`} className="mb-2">
         {processInlineFormatting(para)}
@@ -195,38 +217,75 @@ const processTextSegment = (text: string) => {
   });
 };
 
-// Process inline formatting (bold, italic, code, links)
 const processInlineFormatting = (text: string) => {
-  // First handle the bold text pattern
   const elements: React.ReactNode[] = [];
   let currentText = text;
-  
-  // Process bold text with regex for **text**
-  const boldRegex = /\*\*([^*]+)\*\*/g;
   let lastIndex = 0;
-  let boldMatch;
-  let hasMatches = false;
-  
-  while ((boldMatch = boldRegex.exec(currentText)) !== null) {
-    hasMatches = true;
-    const beforeText = currentText.substring(lastIndex, boldMatch.index);
-    
-    if (beforeText) {
-      elements.push(<span key={`text-${elements.length}`}>{beforeText}</span>);
+
+  const patterns = [
+    {
+      regex: /`([^`]+)`/g,
+      render: (content: string) => renderInlineCode(content)
+    },
+    {
+      regex: /\*\*([^*]+?)\*\*/g,
+      render: (content: string) => <strong key={`bold-${content}`} className="font-bold">{processInlineFormatting(content.trim())}</strong>
+    },
+    {
+      regex: /\*([^*]+?)\*/g,
+      render: (content: string) => <em key={`italic-${content}`} className="italic">{processInlineFormatting(content.trim())}</em>
+    },
+    {
+      regex: /\[([^\]]+)\]\(([^)]+)\)/g,
+      render: (text: string, url: string) => renderLink(text, url)
     }
-    
-    elements.push(<strong key={`bold-${elements.length}`} className="font-bold">{boldMatch[1]}</strong>);
-    
-    lastIndex = boldMatch.index + boldMatch[0].length;
+  ];
+
+  // Find all matches for all patterns
+  const matches: Array<{
+    pattern: typeof patterns[0],
+    match: RegExpExecArray,
+    index: number
+  }> = [];
+
+  // Collect all matches from all patterns
+  patterns.forEach(pattern => {
+    let match;
+    pattern.regex.lastIndex = 0; // Reset regex state
+    while ((match = pattern.regex.exec(text)) !== null) {
+      matches.push({
+        pattern,
+        match,
+        index: match.index
+      });
+    }
+  });
+
+  // Sort matches by their position in the text
+  matches.sort((a, b) => a.index - b.index);
+
+  // Process matches in order
+  matches.forEach(({ pattern, match, index }) => {
+    if (index > lastIndex) {
+      elements.push(<span key={`text-${elements.length}`}>{text.slice(lastIndex, index)}</span>);
+    }
+
+    // Add the formatted element based on pattern type
+    if (pattern.regex.source.includes('\\]\\(')) {
+      elements.push(pattern.render(match[1], match[2])); // For links: text and URL
+    } else {
+      elements.push(pattern.render(match[1])); // For other formats: just the content
+    }
+
+    lastIndex = index + match[0].length;
+  });
+
+  // Add any remaining text
+  if (lastIndex < text.length) {
+    elements.push(<span key={`text-${elements.length}`}>{text.slice(lastIndex)}</span>);
   }
-  
-  if (hasMatches && lastIndex < currentText.length) {
-    elements.push(<span key={`text-${elements.length}`}>{currentText.substring(lastIndex)}</span>);
-    return elements;
-  }
-  
-  // If no matches, return the original text
-  return currentText;
+
+  return elements.length > 0 ? elements : text;
 };
 
 export default MessageContent;

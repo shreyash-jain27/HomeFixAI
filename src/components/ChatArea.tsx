@@ -49,7 +49,7 @@ const ChatArea = () => {
         )}
       </div>
       
-      <div className="border-t p-4 bg-background">
+      <div className="p-4 bg-background">
         <ChatInput />
       </div>
     </div>
