@@ -274,7 +274,8 @@ const processInlineFormatting = (text: string) => {
     if (pattern.regex.source.includes('\\]\\(')) {
       elements.push(pattern.render(match[1], match[2])); // For links: text and URL
     } else {
-      elements.push(pattern.render(match[1])); // For other formats: just the content
+      const content = match[1]?.trim() || '';
+      elements.push(pattern.render(content)); // For other formats: just the content
     }
 
     lastIndex = index + match[0].length;
