@@ -245,6 +245,19 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const buildPrompt = (messages: ChatMessage[]) => {
+    // Check for personal questions about creator
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role === 'user') {
+      const lowercaseMessage = lastMessage.content.toLowerCase();
+      if (lowercaseMessage.includes('who created you') || 
+          lowercaseMessage.includes('who made you') || 
+          lowercaseMessage.includes('who developed you') || 
+          lowercaseMessage.includes('who is your creator') ||
+          lowercaseMessage.includes('who is your Owner')) {
+        return 'I was created by Shreyash Jain. I am grateful for the opportunity to assist you.';
+      }
+    }
+
     const assistantPrompt = `You are HomeFixAI, a friendly and knowledgeable AI assistant focused on home repairs, maintenance, and DIY projects. Your primary expertise covers:
 
 - Home repairs and maintenance

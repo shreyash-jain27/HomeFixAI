@@ -161,28 +161,6 @@ const renderLink = (text: string, url: string) => {
   );
 };
 
-// Helper function for headings with proper rendering
-const renderHeadingElement = (content: string, level: number) => {
-  const baseStyles = "font-semibold text-foreground mb-4";
-  
-  switch (level) {
-    case 1:
-      return <h1 className={`${baseStyles} text-2xl`}>{content}</h1>;
-    case 2:
-      return <h2 className={`${baseStyles} text-xl`}>{content}</h2>;
-    case 3:
-      return <h3 className={`${baseStyles} text-lg`}>{content}</h3>;
-    case 4:
-      return <h4 className={`${baseStyles} text-base`}>{content}</h4>;
-    case 5:
-      return <h5 className={`${baseStyles} text-sm`}>{content}</h5>;
-    case 6:
-      return <h6 className={`${baseStyles} text-xs`}>{content}</h6>;
-    default:
-      return <h2 className={`${baseStyles} text-xl`}>{content}</h2>;
-  }
-};
-
 // Process text segments
 const processTextSegment = (text: string) => {
   // Split text into paragraphs
@@ -193,19 +171,18 @@ const processTextSegment = (text: string) => {
     const headingMatch = para.match(/^(#{1,6})\s+(.+)$/);
     if (headingMatch) {
       const level = headingMatch[1].length;
-      const content = headingMatch[2];
-      return <React.Fragment key={`para-${paraIndex}`}>{renderHeading(content, level)}</React.Fragment>;
+      return renderHeading(headingMatch[2], level);
     }
     
     // Check for lists
     if (para.trim().startsWith('* ') || para.trim().startsWith('- ')) {
       const items = para.split(/\n/).map(line => line.replace(/^[*-]\s+/, '').trim()).filter(Boolean);
-      return <React.Fragment key={`para-${paraIndex}`}>{renderList(items, false)}</React.Fragment>;
+      return renderList(items, false);
     }
     
     if (/^\d+\.\s/.test(para.trim())) {
       const items = para.split(/\n/).map(line => line.replace(/^\d+\.\s+/, '').trim()).filter(Boolean);
-      return <React.Fragment key={`para-${paraIndex}`}>{renderList(items, true)}</React.Fragment>;
+      return renderList(items, true);
     }
     
     // Process inline formatting

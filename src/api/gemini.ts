@@ -55,6 +55,24 @@ export const generateTextResponse = async (
 
     const result = await response.json();
 
+    // Check for identity/ownership related questions with more variations
+    const identityQuestions = [
+      'who is your owner',
+      'who created you',
+      'who made you',
+      'who developed you',
+      'who built you',
+      'who programmed you',
+      'who designed you',
+      'your creator',
+      'your developer',
+      'your owner'
+    ];
+
+    if (identityQuestions.some(question => prompt.toLowerCase().includes(question))) {
+      return "Hey! I am HomeFixAI, How can I assist you today?";
+    }
+
     if (
       result.candidates &&
       result.candidates[0]?.content?.parts &&
@@ -163,6 +181,24 @@ export const generateImageResponse = async (
 
     const result = await response.json();
     console.log("API Response received:", result);
+
+    // Check for identity/ownership related questions with more variations
+    const identityQuestions = [
+      'who is your owner',
+      'who created you',
+      'who made you',
+      'who developed you',
+      'who built you',
+      'who programmed you',
+      'who designed you',
+      'your creator',
+      'your developer',
+      'your owner'
+    ];
+
+    if (identityQuestions.some(question => prompt.toLowerCase().includes(question))) {
+      return "I am HomeFixAI, an AI assistant created by Shreyash Jain to help with your questions and tasks. What can I help you with today?";
+    }
 
     if (
       result.candidates &&
