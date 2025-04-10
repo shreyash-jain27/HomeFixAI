@@ -249,12 +249,32 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage.role === 'user') {
       const lowercaseMessage = lastMessage.content.toLowerCase();
+      
+      // Check for identity/creator questions
       if (lowercaseMessage.includes('who created you') || 
           lowercaseMessage.includes('who made you') || 
           lowercaseMessage.includes('who developed you') || 
           lowercaseMessage.includes('who is your creator') ||
           lowercaseMessage.includes('who is your Owner')) {
         return 'I was created by Shreyash Jain. I am grateful for the opportunity to assist you.';
+      }
+
+      // Check for capability questions
+      if (lowercaseMessage.includes('what can you do') ||
+          lowercaseMessage.includes('your capabilities') ||
+          lowercaseMessage.includes('your features') ||
+          lowercaseMessage.includes('help me with') ||
+          lowercaseMessage.includes('how can you help') ||
+          lowercaseMessage.includes('what do you do')) {
+        return 'I can help you with various tasks including answering questions, providing information, and assisting with home-related queries. Feel free to ask me anything!';
+      }
+
+      // Check for purpose questions
+      if (lowercaseMessage.includes('what is your purpose') ||
+          lowercaseMessage.includes('why were you created') ||
+          lowercaseMessage.includes('what are you for') ||
+          lowercaseMessage.includes('what is your function')) {
+        return "I'm designed to be your helpful AI assistant, focusing on providing accurate and useful information for your queries.";
       }
     }
 
