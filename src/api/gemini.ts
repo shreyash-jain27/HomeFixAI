@@ -12,11 +12,64 @@ export const DEFAULT_VISION_MODEL = "gemini-2.0-flash";
 /**
  * Sends a text-only prompt to the Gemini model
  */
+// Define predefined responses for various types of queries
+const PREDEFINED_RESPONSES = {
+  greetings: {
+    patterns: ['hey', 'hi', 'hello', 'hola', 'howdy', 'greetings'],
+    response: "Hello! I'm HomeFixAI. How can I assist you today?"
+  },
+  identity: {
+    patterns: [
+      'who is your owner',
+      'who created you',
+      'who made you',
+      'who developed you',
+      'who built you',
+      'who programmed you',
+      'who designed you',
+      'your creator',
+      'your developer',
+      'your owner'
+    ],
+    response: "I am HomeFixAI, an AI assistant created by Shreyash Jain to help with your questions and tasks. What can I help you with today?"
+  },
+  capabilities: {
+    patterns: [
+      'what can you do',
+      'your capabilities',
+      'your features',
+      'help me with',
+      'how can you help',
+      'what do you do'
+    ],
+    response: "I can help you with various tasks including answering questions, providing information, and assisting with home-related queries. Feel free to ask me anything!"
+  },
+  purpose: {
+    patterns: [
+      'what is your purpose',
+      'why were you created',
+      'what are you for',
+      'what is your function'
+    ],
+    response: "I'm designed to be your helpful AI assistant, focusing on providing accurate and useful information for your queries."
+  }
+};
+
 export const generateTextResponse = async (
   prompt: string,
   apiKey: string,
   model: string = DEFAULT_TEXT_MODEL
 ): Promise<string> => {
+  const promptLower = prompt.toLowerCase();
+
+  // Check for predefined responses first
+  for (const [category, data] of Object.entries(PREDEFINED_RESPONSES)) {
+    if (data.patterns.some(pattern => promptLower.includes(pattern))) {
+      return data.response;
+    }
+  }
+
+  // If no predefined response matches, proceed with API call
   try {
     const response = await fetch(
       `${GEMINI_API_URL}/models/${model}:generateContent?key=${apiKey}`,
@@ -54,24 +107,6 @@ export const generateTextResponse = async (
     }
 
     const result = await response.json();
-
-    // Check for identity/ownership related questions with more variations
-    const identityQuestions = [
-      'who is your owner',
-      'who created you',
-      'who made you',
-      'who developed you',
-      'who built you',
-      'who programmed you',
-      'who designed you',
-      'your creator',
-      'your developer',
-      'your owner'
-    ];
-
-    if (identityQuestions.some(question => prompt.toLowerCase().includes(question))) {
-      return "Hey! I am HomeFixAI, How can I assist you today?";
-    }
 
     if (
       result.candidates &&
