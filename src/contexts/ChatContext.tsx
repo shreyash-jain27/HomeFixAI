@@ -90,6 +90,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
 
+  // Add this helper function for delay
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   const sendMessage = async (message: string, imageFiles?: File[]) => {
     if (!currentChatId) {
       const newChatId = createNewChat();
@@ -105,6 +108,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     
     try {
+      // Add a 500ms delay to simulate thinking
+      await delay(500);
+
       const userMessageId = generateId();
       let images: string[] = [];
       
@@ -250,31 +256,79 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     if (lastMessage.role === 'user') {
       const lowercaseMessage = lastMessage.content.toLowerCase();
       
+      // Identity and creator questions
+      const identityPatterns = [
+        'who created you',
+        'who made you',
+        'who developed you',
+        'who is your creator',
+        'who is your owner',
+        'who owns you',
+        'who built you',
+        'your creator',
+        'tell me about yourself',
+        'what are you',
+        'who are you'
+      ];
+
       // Check for identity/creator questions
-      if (lowercaseMessage.includes('who created you') || 
-          lowercaseMessage.includes('who made you') || 
-          lowercaseMessage.includes('who developed you') || 
-          lowercaseMessage.includes('who is your creator') ||
-          lowercaseMessage.includes('who is your Owner')) {
-        return 'I was created by Shreyash Jain. I am grateful for the opportunity to assist you.';
+      if (identityPatterns.some(pattern => lowercaseMessage.includes(pattern))) {
+        // Return a direct response that doesn't get processed further by the model
+        return `DIRECT_RESPONSE:I am HomeFixAI, an AI assistant created by Shreyash Jain. I specialize in helping people with home repairs, maintenance, and DIY projects. I'm designed to provide practical, detailed advice while maintaining safety as a top priority. While I can engage in friendly conversation, my primary focus is on helping you with your home-related questions and projects.`;
       }
 
       // Check for capability questions
-      if (lowercaseMessage.includes('what can you do') ||
-          lowercaseMessage.includes('your capabilities') ||
-          lowercaseMessage.includes('your features') ||
-          lowercaseMessage.includes('help me with') ||
-          lowercaseMessage.includes('how can you help') ||
-          lowercaseMessage.includes('what do you do')) {
-        return 'I can help you with various tasks including answering questions, providing information, and assisting with home-related queries. Feel free to ask me anything!';
+      const capabilityPatterns = [
+        'what can you do',
+        'your capabilities',
+        'your features',
+        'help me with',
+        'how can you help',
+        'what do you do',
+        'what are you capable of',
+        'what services',
+        'how do you work'
+      ];
+
+      if (capabilityPatterns.some(pattern => lowercaseMessage.includes(pattern))) {
+        return `As HomeFixAI, I specialize in:
+
+1. Home Repairs & Maintenance
+   - Troubleshooting common issues
+   - Step-by-step repair guides
+   - Preventive maintenance advice
+
+2. DIY Projects
+   - Project planning and execution
+   - Tool and material recommendations
+   - Safety guidelines and best practices
+
+3. Home Systems
+   - Basic plumbing assistance
+   - Electrical system guidance
+   - HVAC maintenance tips
+
+4. Safety & Prevention
+   - Safety protocols for repairs
+   - Identifying potential hazards
+   - When to call professionals
+
+I provide detailed, practical advice while always prioritizing safety. How can I assist you with your home-related needs today?`;
       }
 
-      // Check for purpose questions
-      if (lowercaseMessage.includes('what is your purpose') ||
-          lowercaseMessage.includes('why were you created') ||
-          lowercaseMessage.includes('what are you for') ||
-          lowercaseMessage.includes('what is your function')) {
-        return "I'm designed to be your helpful AI assistant, focusing on providing accurate and useful information for your queries.";
+      // Check for purpose/background questions
+      const purposePatterns = [
+        'what is your purpose',
+        'why were you created',
+        'what are you for',
+        'what is your function',
+        'why do you exist',
+        'what\'s your goal',
+        'what\'s your mission'
+      ];
+
+      if (purposePatterns.some(pattern => lowercaseMessage.includes(pattern))) {
+        return `My specific purpose is to help people maintain and improve their homes. My mission is to make home repairs and DIY projects more accessible by providing clear, practical guidance while ensuring safety. I combine technical knowledge with easy-to-follow instructions to help you tackle home-related challenges confidently.`;
       }
     }
 

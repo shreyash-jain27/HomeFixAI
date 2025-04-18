@@ -1,6 +1,4 @@
-/**
- * This file contains utilities for interacting with the Google Gemini API
- */
+//This file contains utilities for interacting with the Google Gemini API
 
 // The API endpoint for Gemini
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta";
@@ -9,15 +7,18 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta";
 export const DEFAULT_TEXT_MODEL = "gemini-1.5-pro";
 export const DEFAULT_VISION_MODEL = "gemini-2.0-flash";
 
-/**
- * Sends a text-only prompt to the Gemini model
- */
+
 export const generateTextResponse = async (
   prompt: string,
   apiKey: string,
   model: string = DEFAULT_TEXT_MODEL
 ): Promise<string> => {
   try {
+    // Check if this is a direct response
+    if (prompt.startsWith('DIRECT_RESPONSE:')) {
+      return prompt.replace('DIRECT_RESPONSE:', '');
+    }
+
     const response = await fetch(
       `${GEMINI_API_URL}/models/${model}:generateContent?key=${apiKey}`,
       {
